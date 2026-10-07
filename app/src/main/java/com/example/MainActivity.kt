@@ -25,7 +25,9 @@ import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.ImageToPdfScreen
 import com.example.ui.screens.LockPdfScreen
 import com.example.ui.screens.MergeScreen
+import com.example.ui.screens.NfcKeyEmulatorScreen
 import com.example.ui.screens.P2pTransferScreen
+import com.example.ui.screens.PdfPreviewScreen
 import com.example.ui.screens.QrGeneratorScreen
 import com.example.ui.screens.SplitScreen
 import com.example.ui.screens.UnlockPdfScreen
@@ -35,10 +37,12 @@ import com.example.ui.viewmodel.ImageToPdfViewModel
 import com.example.ui.viewmodel.LockPdfViewModel
 import com.example.ui.viewmodel.MergeViewModel
 import com.example.ui.viewmodel.P2pViewModel
+import com.example.ui.viewmodel.PdfPreviewViewModel
 import com.example.ui.viewmodel.QrViewModel
 import com.example.ui.viewmodel.SplitViewModel
 import com.example.ui.viewmodel.ThemeViewModel
 import com.example.ui.viewmodel.UnlockPdfViewModel
+import android.net.Uri
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -77,9 +81,12 @@ fun MteMergeAppContent(
     val lockPdfViewModel: LockPdfViewModel = viewModel()
     val unlockPdfViewModel: UnlockPdfViewModel = viewModel()
     val p2pViewModel: P2pViewModel = viewModel()
+    val pdfPreviewViewModel: PdfPreviewViewModel = viewModel()
 
     var p2pFileToSend by remember { mutableStateOf<File?>(null) }
     var p2pInitialRole by remember { mutableStateOf(P2pRole.RECEIVER) }
+    var previewUri by remember { mutableStateOf<Uri?>(null) }
+    var previewFileName by remember { mutableStateOf("Document.pdf") }
 
     NavHost(
         navController = navController,
@@ -105,7 +112,12 @@ fun MteMergeAppContent(
                 onNavigateBack = { navController.popBackStack() },
                 themeMode = themeMode,
                 onToggleTheme = { themeViewModel.toggleTheme() },
-                viewModel = mergeViewModel
+                viewModel = mergeViewModel,
+                onPreviewPdf = { uri, fileName ->
+                    previewUri = uri
+                    previewFileName = fileName
+                    navController.navigate(Screen.PdfPreview.route)
+                }
             )
         }
 
@@ -180,6 +192,11 @@ fun MteMergeAppContent(
                     p2pFileToSend = file
                     p2pInitialRole = P2pRole.SENDER
                     navController.navigate(Screen.P2pShare.route)
+                },
+                onActionPreview = { uri, fileName ->
+                    previewUri = uri
+                    previewFileName = fileName
+                    navController.navigate(Screen.PdfPreview.route)
                 }
             )
         }
@@ -193,6 +210,40 @@ fun MteMergeAppContent(
                 initialRole = p2pInitialRole,
                 fileToSend = p2pFileToSend
             )
+        }
+
+        composable(Screen.NfcKeyEmulator.route) {
+            NfcKeyEmulatorScreen(
+                onNavigateBack = { navController.popBackStack() },
+                themeMode = themeMode,
+                onToggleTheme = { themeViewModel.toggleTheme() }
+            )
+        }
+
+        composable(Screen.PdfPreview.route) {
+            val uri = previewUri
+            if (uri != null) {
+                PdfPreviewScreen(
+                    uri = uri,
+                    fileName = previewFileName,
+                    viewModel = pdfPreviewViewModel,
+                    onNavigateBack = { navController.popBackStack() },
+                    onSelectPageRange = { selectedUri ->
+                        splitViewModel.selectPdf(context, selectedUri)
+                        navController.navigate(Screen.Split.route)
+                    },
+                    onConfirmKeep = {
+                        navController.popBackStack()
+                    }
+                )
+            } else {
+                HomeScreen(
+                    themeMode = themeMode,
+                    onToggleTheme = { themeViewModel.toggleTheme() },
+                    onNavigate = { route -> navController.navigate(route) },
+                    historyViewModel = historyViewModel
+                )
+            }
         }
     }
 }

@@ -33,8 +33,10 @@ import androidx.compose.material.icons.rounded.Description
 import androidx.compose.material.icons.rounded.ErrorOutline
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.OpenInNew
+import androidx.compose.material.icons.rounded.PhoneAndroid
 import androidx.compose.material.icons.rounded.Radar
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -92,7 +94,8 @@ fun P2pTransferScreen(
     onToggleTheme: () -> Unit,
     viewModel: P2pViewModel,
     initialRole: P2pRole = P2pRole.RECEIVER,
-    fileToSend: File? = null
+    fileToSend: File? = null,
+    onLaunchPreview: (android.net.Uri, String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()

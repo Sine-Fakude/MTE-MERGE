@@ -89,7 +89,8 @@ fun MergeScreen(
     onNavigateBack: () -> Unit,
     themeMode: ThemeMode,
     onToggleTheme: () -> Unit,
-    viewModel: MergeViewModel
+    viewModel: MergeViewModel,
+    onPreviewPdf: (Uri, String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
@@ -370,7 +371,8 @@ fun MergeScreen(
                             totalItems = uiState.selectedPdfs.size,
                             onMovePrev = { viewModel.moveUp(index) },
                             onMoveNext = { viewModel.moveDown(index) },
-                            onRemove = { viewModel.removePdf(item) }
+                            onRemove = { viewModel.removePdf(item) },
+                            onPreview = { onPreviewPdf(item.uri, item.fileName) }
                         )
                     }
                 } else {
@@ -402,7 +404,8 @@ private fun GridPdfStagingCard(
     totalItems: Int,
     onMovePrev: () -> Unit,
     onMoveNext: () -> Unit,
-    onRemove: () -> Unit
+    onRemove: () -> Unit,
+    onPreview: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -451,17 +454,19 @@ private fun GridPdfStagingCard(
                 )
             }
 
-            // Document Details center
+            // Document Details center - Clickable to open full-screen Native PDF Preview
             Column(
                 modifier = Modifier
                     .align(Alignment.Center)
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onPreview() }
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Description,
-                    contentDescription = null,
+                    contentDescription = "Preview document",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(32.dp)
                 )
@@ -475,9 +480,10 @@ private fun GridPdfStagingCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "${item.pageCount}p • ${item.formattedSize}",
+                    text = "${item.pageCount}p • Tap to preview",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                    fontWeight = FontWeight.Medium
                 )
             }
 

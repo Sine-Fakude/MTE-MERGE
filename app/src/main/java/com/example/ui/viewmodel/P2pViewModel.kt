@@ -24,6 +24,10 @@ class P2pViewModel(application: Application) : AndroidViewModel(application) {
         P2pShareManager.startReceiver(context)
     }
 
+    fun connectToUser(context: Context, endpointId: String, endpointName: String) {
+        P2pShareManager.connectToUser(context, endpointId, endpointName)
+    }
+
     fun cancel(context: Context) {
         P2pShareManager.reset(context)
     }

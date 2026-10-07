@@ -31,6 +31,7 @@ import androidx.compose.material.icons.rounded.LockOpen
 import androidx.compose.material.icons.rounded.OpenInNew
 import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Visibility
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -84,7 +85,8 @@ fun HistoryScreen(
     onActionSplit: (Uri) -> Unit = {},
     onActionLock: (Uri) -> Unit = {},
     onActionUnlock: (Uri) -> Unit = {},
-    onActionShareNearby: (File, String) -> Unit = { _, _ -> }
+    onActionShareNearby: (File, String) -> Unit = { _, _ -> },
+    onActionPreview: (Uri, String) -> Unit = { _, _ -> }
 ) {
     val context = LocalContext.current
     val historyList by viewModel.historyList.collectAsState()
@@ -255,6 +257,17 @@ fun HistoryScreen(
 
                     // Actionable buttons tailored to file (unified ElectricCyan & CyberMagenta)
                     if (isPdf) {
+                        ActionSheetRow(
+                            icon = Icons.Rounded.Visibility,
+                            title = "Preview Document",
+                            subtitle = "Full-screen native PdfRenderer with pinch-to-zoom",
+                            accentColor = ElectricCyan,
+                            onClick = {
+                                activeItemForActions = null
+                                onActionPreview(fileUri, item.fileName)
+                            }
+                        )
+
                         ActionSheetRow(
                             icon = Icons.Rounded.CallMerge,
                             title = "Merge with other files",

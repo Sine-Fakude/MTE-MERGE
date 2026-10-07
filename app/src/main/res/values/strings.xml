@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">MTE Merge</string>
+    <string name="hce_service_desc">MTE Merge NFC Hardware Key Service</string>
+    <string name="hce_aid_desc">MTE Merge HCE Security Token</string>
 </resources>

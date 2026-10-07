@@ -29,6 +29,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.util.concurrent.ConcurrentHashMap
+import android.net.Uri
 
 enum class P2pRole {
     NONE, SENDER, RECEIVER
@@ -45,6 +46,11 @@ enum class P2pTransferState {
     ERROR
 }
 
+data class P2pDiscoveredUser(
+    val endpointId: String,
+    val endpointName: String
+)
+
 data class P2pUiState(
     val role: P2pRole = P2pRole.NONE,
     val state: P2pTransferState = P2pTransferState.IDLE,
@@ -55,6 +61,8 @@ data class P2pUiState(
     val bytesTransferred: Long = 0L,
     val progress: Float = 0f,
     val completedFile: File? = null,
+    val completedUri: Uri? = null,
+    val discoveredUsers: List<P2pDiscoveredUser> = emptyList(),
     val errorMessage: String? = null
 )
 
@@ -184,59 +192,23 @@ object P2pShareManager {
             SERVICE_ID,
             object : EndpointDiscoveryCallback() {
                 override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-                    Log.d(TAG, "Receiver: Found endpoint ${info.endpointName}, requesting connection")
-                    _uiState.update {
-                        it.copy(
-                            state = P2pTransferState.CONNECTING,
-                            connectedDeviceName = info.endpointName,
-                            statusMessage = "Found ${info.endpointName}! Connecting..."
+                    Log.d(TAG, "Receiver: Found endpoint ${info.endpointName}")
+                    _uiState.update { current ->
+                        val existing = current.discoveredUsers.filter { it.endpointId != endpointId }
+                        current.copy(
+                            discoveredUsers = existing + P2pDiscoveredUser(endpointId, info.endpointName),
+                            statusMessage = "Found ${info.endpointName}! Tap device to connect."
                         )
                     }
-
-                    client.requestConnection(
-                        localDeviceName,
-                        endpointId,
-                        object : ConnectionLifecycleCallback() {
-                            override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
-                                client.acceptConnection(endpointId, createPayloadCallback(appContext))
-                            }
-
-                            override fun onConnectionResult(endpointId: String, resolution: ConnectionResolution) {
-                                if (resolution.status.isSuccess) {
-                                    client.stopDiscovery()
-                                    val devName = _uiState.value.connectedDeviceName ?: "Nearby Device"
-                                    _uiState.update {
-                                        it.copy(
-                                            state = P2pTransferState.CONNECTED,
-                                            statusMessage = "Connected to $devName! Waiting for file payload..."
-                                        )
-                                    }
-                                } else {
-                                    _uiState.update {
-                                        it.copy(
-                                            state = P2pTransferState.ERROR,
-                                            errorMessage = "Could not establish secure link"
-                                        )
-                                    }
-                                }
-                            }
-
-                            override fun onDisconnected(endpointId: String) {
-                                if (_uiState.value.state != P2pTransferState.COMPLETED) {
-                                    _uiState.update {
-                                        it.copy(
-                                            state = P2pTransferState.ERROR,
-                                            errorMessage = "Device disconnected unexpectedly"
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    )
                 }
 
                 override fun onEndpointLost(endpointId: String) {
                     Log.d(TAG, "Receiver: Endpoint lost: $endpointId")
+                    _uiState.update { current ->
+                        current.copy(
+                            discoveredUsers = current.discoveredUsers.filter { it.endpointId != endpointId }
+                        )
+                    }
                 }
             },
             discoveryOptions
@@ -249,6 +221,62 @@ object P2pShareManager {
                 )
             }
         }
+    }
+
+    /**
+     * Connects to a selected discovered MTE Merge user from the frosted glass list.
+     */
+    fun connectToUser(context: Context, endpointId: String, endpointName: String) {
+        val appContext = context.applicationContext
+        val client = Nearby.getConnectionsClient(appContext)
+        _uiState.update {
+            it.copy(
+                state = P2pTransferState.CONNECTING,
+                connectedDeviceName = endpointName,
+                statusMessage = "Connecting with $endpointName..."
+            )
+        }
+
+        client.requestConnection(
+            localDeviceName,
+            endpointId,
+            object : ConnectionLifecycleCallback() {
+                override fun onConnectionInitiated(endpointId: String, connectionInfo: ConnectionInfo) {
+                    client.acceptConnection(endpointId, createPayloadCallback(appContext))
+                }
+
+                override fun onConnectionResult(endpointId: String, resolution: ConnectionResolution) {
+                    if (resolution.status.isSuccess) {
+                        client.stopDiscovery()
+                        val devName = _uiState.value.connectedDeviceName ?: "Nearby Device"
+                        _uiState.update {
+                            it.copy(
+                                state = P2pTransferState.CONNECTED,
+                                statusMessage = "Connected to $devName! Waiting for file payload..."
+                            )
+                        }
+                    } else {
+                        _uiState.update {
+                            it.copy(
+                                state = P2pTransferState.ERROR,
+                                errorMessage = "Could not establish secure link"
+                            )
+                        }
+                    }
+                }
+
+                override fun onDisconnected(endpointId: String) {
+                    if (_uiState.value.state != P2pTransferState.COMPLETED) {
+                        _uiState.update {
+                            it.copy(
+                                state = P2pTransferState.ERROR,
+                                errorMessage = "Device disconnected unexpectedly"
+                            )
+                        }
+                    }
+                }
+            }
+        )
     }
 
     private fun sendFilePayload(context: Context, endpointId: String, file: File) {
@@ -392,14 +420,15 @@ object P2pShareManager {
                     }
                 }
 
+                val contentUri = ShareManager.getFileUri(context, targetFile)
+
                 // Register received file into Room database history
                 try {
                     val repo = MteMergeApp.instance.documentRepository
-                    val uri = ShareManager.getFileUri(context, targetFile).toString()
                     repo.recordOperation(
                         fileName = desiredName,
                         filePath = targetFile.absolutePath,
-                        uriString = uri,
+                        uriString = contentUri.toString(),
                         operationType = "P2P_SHARE",
                         fileSizeBytes = targetFile.length(),
                         pageCount = 1
@@ -413,6 +442,7 @@ object P2pShareManager {
                         state = P2pTransferState.COMPLETED,
                         progress = 1f,
                         completedFile = targetFile,
+                        completedUri = contentUri,
                         statusMessage = "Document received and saved to local storage!"
                     )
                 }

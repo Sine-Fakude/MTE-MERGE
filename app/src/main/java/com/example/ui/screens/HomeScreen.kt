@@ -22,11 +22,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.CallMerge
 import androidx.compose.material.icons.rounded.CallSplit
+import androidx.compose.material.icons.rounded.Contactless
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockOpen
+import androidx.compose.material.icons.rounded.Nfc
 import androidx.compose.material.icons.rounded.PictureAsPdf
 import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.Share
 import androidx.compose.material.icons.rounded.WifiTethering
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -263,6 +266,36 @@ fun HomeScreen(
                             accentColor = CyberMagenta,
                             onClick = { onNavigate(Screen.UnlockPdf.route) },
                             testTag = "home_card_unlock_pdf"
+                        )
+                    }
+                }
+
+                // Row 4: Act as NFC Key (Cyber Magenta) & P2P Air Share (Electric Cyan)
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        LiquidGlassTile(
+                            modifier = Modifier.weight(1f),
+                            title = "Act as NFC Key",
+                            subtitle = "Emulate physical HCE security key",
+                            badge = "HCE Smart",
+                            icon = Icons.Rounded.Nfc,
+                            accentColor = CyberMagenta,
+                            onClick = { onNavigate(Screen.NfcKeyEmulator.route) },
+                            testTag = "home_card_nfc_key_emulator"
+                        )
+
+                        LiquidGlassTile(
+                            modifier = Modifier.weight(1f),
+                            title = "Offline P2P",
+                            subtitle = "Radar tap-to-share via Nearby",
+                            badge = "No Internet",
+                            icon = Icons.Rounded.WifiTethering,
+                            accentColor = ElectricCyan,
+                            onClick = { onNavigate(Screen.P2pShare.route) },
+                            testTag = "home_card_p2p_share"
                         )
                     }
                 }
