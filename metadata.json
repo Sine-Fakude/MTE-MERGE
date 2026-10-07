@@ -1,0 +1,6 @@
+{
+  "name": "MTE Merge",
+  "description": "Comprehensive PDF merge, split, image to PDF conversion, and custom QR code generator with universal sharing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

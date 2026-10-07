@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Overlapping Translucent Neon Document Stack forming 'M' Motif on Transparent Background -->
+    
+    <!-- Subtle Ambient Neon Cyan Glow Behind Safe Area (Safe zone: 18..90) -->
+    <path
+        android:fillColor="#1A00E5FF"
+        android:pathData="M34,30 C34,26.7 36.7,24 40,24 H68 C71.3,24 74,26.7 74,30 V78 C74,81.3 71.3,84 68,84 H40 C36.7,84 34,81.3 34,78 Z" />
+
+    <!-- Back Document Plane: Cyber Magenta Liquid Glass Layer -->
+    <path
+        android:fillColor="#33FF00FF"
+        android:strokeColor="#66FF00FF"
+        android:strokeWidth="1"
+        android:pathData="M32,28 C32,25.2 34.2,23 37,23 H59 C61.8,23 64,25.2 64,28 V72 C64,74.8 61.8,77 59,77 H37 C34.2,77 32,74.8 32,72 Z" />
+
+    <!-- Front Document Plane: Electric Cyan Liquid Glass Layer -->
+    <path
+        android:fillColor="#3300E5FF"
+        android:strokeColor="#8000E5FF"
+        android:strokeWidth="1"
+        android:pathData="M44,35 C44,32.2 46.2,30 49,30 H71 C73.8,30 76,32.2 76,35 V79 C76,81.8 73.8,84 71,84 H49 C46.2,84 44,81.8 44,79 Z" />
+
+    <!-- Overlapping Neon 'M' Core Glyph: Left Stem (Electric Cyan) -->
+    <path
+        android:fillColor="#E600E5FF"
+        android:pathData="M39,37 C39,35.3 40.3,34 42,34 H45 C46.7,34 48,35.3 48,37 V71 C48,72.7 46.7,74 45,74 H42 C40.3,74 39,72.7 39,71 Z" />
+
+    <!-- Overlapping Neon 'M' Core Glyph: Right Stem (Cyber Magenta) -->
+    <path
+        android:fillColor="#E6FF00FF"
+        android:pathData="M60,37 C60,35.3 61.3,34 63,34 H66 C67.7,34 69,35.3 69,37 V71 C69,72.7 67.7,74 66,74 H63 C61.3,74 60,72.7 60,71 Z" />
+
+    <!-- Overlapping Chevron / Merging Apex of 'M' (Luminous White Nexus with High-Contrast Junction) -->
+    <path
+        android:fillColor="#F0FFFFFF"
+        android:pathData="M45,36 L54,52 L63,36 H67 L56.2,56 C55.1,58 52.9,58 51.8,56 L41,36 Z" />
+
+    <!-- Subtle Minimalist Horizontal Indicator Bars (Document Lines) -->
+    <path
+        android:fillColor="#6600E5FF"
+        android:pathData="M42,66 H48 C48.6,66 49,66.4 49,67 C49,67.6 48.6,68 42,68 Z" />
+
+    <path
+        android:fillColor="#66FF00FF"
+        android:pathData="M60,66 H66 C66.6,66 67,66.4 67,67 C67,67.6 66.6,68 60,68 Z" />
+
+</vector>
